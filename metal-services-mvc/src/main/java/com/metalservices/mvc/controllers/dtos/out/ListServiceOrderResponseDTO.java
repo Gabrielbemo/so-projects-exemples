@@ -1,15 +1,17 @@
 package com.metalservices.mvc.controllers.dtos.out;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.metalservices.mvc.entity.ServiceOrder;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class ListServiceOrderResponseDTO {
     private Long id;
     private String serviceOrderNumber;
