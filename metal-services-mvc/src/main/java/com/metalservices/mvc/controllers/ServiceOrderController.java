@@ -2,12 +2,16 @@ package com.metalservices.mvc.controllers;
 
 import com.metalservices.mvc.controllers.dtos.in.CreateServiceOrderRequestDTO;
 import com.metalservices.mvc.controllers.dtos.out.CreateServiceOrderResponseDTO;
+import com.metalservices.mvc.controllers.dtos.out.ListServiceOrderResponseDTO;
 import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.services.ServiceOrderServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/service-orders")
@@ -21,14 +25,21 @@ public class ServiceOrderController {
     }
 
     @GetMapping("/")
-    public List<ServiceOrder> getAll(){
-        return serviceOrderServices.list();
+    public ResponseEntity<List<ListServiceOrderResponseDTO>> getAll(){
+
+        return new ResponseEntity<List<ListServiceOrderResponseDTO>>(
+                serviceOrderServices.list().stream().map(serviceOrder -> ListServiceOrderResponseDTO.fromEntity(serviceOrder)).collect(Collectors.toList()),
+                HttpStatus.OK);
+
     }
 
     @PostMapping("/")
-    public CreateServiceOrderResponseDTO create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO){
+    public ResponseEntity<CreateServiceOrderResponseDTO> create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO){
         ServiceOrder serviceOrder = serviceOrderServices.create(createServiceOrderRequestDTO.toEntity());
-        return CreateServiceOrderResponseDTO.fromEntity(serviceOrder);
+
+        return new ResponseEntity<CreateServiceOrderResponseDTO>(
+                CreateServiceOrderResponseDTO.fromEntity(serviceOrder),
+                HttpStatus.CREATED);
     }
 
     public void getById(){
