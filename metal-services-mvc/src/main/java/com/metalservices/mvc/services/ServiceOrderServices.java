@@ -1,6 +1,6 @@
 package com.metalservices.mvc.services;
 
-import com.metalservices.mvc.models.ServiceOrder;
+import com.metalservices.mvc.entity.ServiceOrder;
 
 import java.util.List;
 

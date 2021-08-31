@@ -1,6 +1,6 @@
 package com.metalservices.mvc.services.impl;
 
-import com.metalservices.mvc.models.ServiceOrder;
+import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.repositories.ServiceOrderRepository;
 import com.metalservices.mvc.services.ServiceOrderServices;
 import org.springframework.beans.factory.annotation.Autowired;

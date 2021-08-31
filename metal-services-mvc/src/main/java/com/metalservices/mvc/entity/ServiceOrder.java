@@ -1,4 +1,4 @@
-package com.metalservices.mvc.models;
+package com.metalservices.mvc.entity;
 
 import lombok.*;
 
@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ServiceOrder {
 
     @Id

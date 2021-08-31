@@ -1,6 +1,8 @@
 package com.metalservices.mvc.controllers;
 
-import com.metalservices.mvc.models.ServiceOrder;
+import com.metalservices.mvc.controllers.dtos.in.CreateServiceOrderRequestDTO;
+import com.metalservices.mvc.controllers.dtos.out.CreateServiceOrderResponseDTO;
+import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.services.ServiceOrderServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +26,9 @@ public class ServiceOrderController {
     }
 
     @PostMapping("/")
-    public ServiceOrder create(@RequestBody final ServiceOrder serviceOrder){
-        return serviceOrderServices.create(serviceOrder);
+    public CreateServiceOrderResponseDTO create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO){
+        ServiceOrder serviceOrder = serviceOrderServices.create(createServiceOrderRequestDTO.toEntity());
+        return CreateServiceOrderResponseDTO.fromEntity(serviceOrder);
     }
 
     public void getById(){
