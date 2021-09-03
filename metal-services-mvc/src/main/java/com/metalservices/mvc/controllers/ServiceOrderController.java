@@ -25,7 +25,7 @@ public class ServiceOrderController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<ListServiceOrderResponseDTO>> getAll(){
+    public ResponseEntity<List<ListServiceOrderResponseDTO>> list(){
 
         return new ResponseEntity<List<ListServiceOrderResponseDTO>>(
                 serviceOrderServices.list().stream().map(serviceOrder -> ListServiceOrderResponseDTO.fromEntity(serviceOrder)).collect(Collectors.toList()),
