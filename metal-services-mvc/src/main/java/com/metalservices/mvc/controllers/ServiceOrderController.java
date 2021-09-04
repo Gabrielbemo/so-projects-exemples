@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ public class ServiceOrderController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<CreateServiceOrderResponseDTO> create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO){
+    public ResponseEntity<CreateServiceOrderResponseDTO> create(@RequestBody @Valid final CreateServiceOrderRequestDTO createServiceOrderRequestDTO){
         ServiceOrder serviceOrder = serviceOrderServices.create(createServiceOrderRequestDTO.toEntity());
 
         return new ResponseEntity<CreateServiceOrderResponseDTO>(

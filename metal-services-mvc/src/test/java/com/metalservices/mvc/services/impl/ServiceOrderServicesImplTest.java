@@ -1,8 +1,7 @@
-package com.metalservices.mvc.services;
+package com.metalservices.mvc.services.impl;
 
 import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.repositories.ServiceOrderRepository;
-import com.metalservices.mvc.services.impl.ServiceOrderServicesImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,11 +13,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceOrderServicesImplTeste {
+public class ServiceOrderServicesImplTest {
 
     @InjectMocks
     private ServiceOrderServicesImpl service;
@@ -27,7 +28,7 @@ public class ServiceOrderServicesImplTeste {
     private ServiceOrderRepository serviceOrderRepository;
 
     @Test
-    public void when_listWithSuccess_then_returnList() throws Exception {
+    public void when_listWithSuccess_then_returnList() {
         List<ServiceOrder> serviceOrders = new ArrayList<ServiceOrder>();
         ServiceOrder serviceOrder1 = new ServiceOrder(1L, "123", LocalDateTime.now());
         ServiceOrder serviceOrder2 = new ServiceOrder(2L, "231", LocalDateTime.now());
@@ -38,20 +39,23 @@ public class ServiceOrderServicesImplTeste {
 
         when(serviceOrderRepository.findAll()).thenReturn(serviceOrders);
 
+        assertDoesNotThrow(() -> {
+            List<ServiceOrder> listServiceOrders = service.list();
 
-        List<ServiceOrder> listServiceOrders = service.list();
+            assertEquals(listServiceOrders.size(), serviceOrders.size());
 
-        assertEquals(listServiceOrders.size(), serviceOrders.size());
+            assertEquals(serviceOrders.get(0).getId(), listServiceOrders.get(0).getId());
+            assertEquals(serviceOrders.get(0).getServiceOrderNumber(), listServiceOrders.get(0).getServiceOrderNumber());
+            assertEquals(serviceOrders.get(0).getCreatedAt(), listServiceOrders.get(0).getCreatedAt());
+            assertEquals(serviceOrders.get(1).getId(), listServiceOrders.get(1).getId());
+            assertEquals(serviceOrders.get(1).getServiceOrderNumber(), listServiceOrders.get(1).getServiceOrderNumber());
+            assertEquals(serviceOrders.get(1).getCreatedAt(), listServiceOrders.get(2).getCreatedAt());
+            assertEquals(serviceOrders.get(2).getId(), listServiceOrders.get(2).getId());
+            assertEquals(serviceOrders.get(2).getServiceOrderNumber(), listServiceOrders.get(2).getServiceOrderNumber());
+            assertEquals(serviceOrders.get(2).getCreatedAt(), listServiceOrders.get(2).getCreatedAt());
 
-        assertEquals(serviceOrders.get(0).getId(), listServiceOrders.get(0).getId());
-        assertEquals(serviceOrders.get(0).getServiceOrderNumber(), listServiceOrders.get(0).getServiceOrderNumber());
-        assertEquals(serviceOrders.get(0).getCreatedAt(), listServiceOrders.get(0).getCreatedAt());
-        assertEquals(serviceOrders.get(1).getId(), listServiceOrders.get(1).getId());
-        assertEquals(serviceOrders.get(1).getServiceOrderNumber(), listServiceOrders.get(1).getServiceOrderNumber());
-        assertEquals(serviceOrders.get(1).getCreatedAt(), listServiceOrders.get(2).getCreatedAt());
-        assertEquals(serviceOrders.get(2).getId(), listServiceOrders.get(2).getId());
-        assertEquals(serviceOrders.get(2).getServiceOrderNumber(), listServiceOrders.get(2).getServiceOrderNumber());
-        assertEquals(serviceOrders.get(2).getCreatedAt(), listServiceOrders.get(2).getCreatedAt());
+            verify(serviceOrderRepository).findAll();
+        });
     }
 
     @Test
@@ -63,6 +67,8 @@ public class ServiceOrderServicesImplTeste {
         List<ServiceOrder> listServiceOrders = service.list();
 
         assertEquals(listServiceOrders.size(), serviceOrders.size());
+
+        verify(serviceOrderRepository).findAll();
     }
 
     @Test
@@ -72,6 +78,8 @@ public class ServiceOrderServicesImplTeste {
         Assertions.assertThrows(RuntimeException.class, () -> {
             service.list();
         });
+
+        verify(serviceOrderRepository).findAll();
     }
 
     @Test
@@ -88,6 +96,9 @@ public class ServiceOrderServicesImplTeste {
         assertEquals(serviceOrder.getServiceOrderNumber(), serviceOrderCreated.getServiceOrderNumber());
         assertEquals(serviceOrder.getCreatedAt(), serviceOrderCreated.getCreatedAt());
 
+
+        verify(serviceOrderRepository).save(serviceOrder);
+        verify(serviceOrderRepository).findByServiceOrderNumber(serviceOrder.getServiceOrderNumber());
     }
 
     @Test
@@ -100,5 +111,8 @@ public class ServiceOrderServicesImplTeste {
         Assertions.assertThrows(RuntimeException.class, () -> {
             service.create(serviceOrder);
         });
+
+        verify(serviceOrderRepository).save(serviceOrder);
+        verify(serviceOrderRepository).findByServiceOrderNumber(serviceOrder.getServiceOrderNumber());
     }
 }
