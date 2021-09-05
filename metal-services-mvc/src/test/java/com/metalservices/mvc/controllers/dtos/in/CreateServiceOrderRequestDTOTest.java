@@ -1,7 +1,6 @@
 package com.metalservices.mvc.controllers.dtos.in;
 
 import com.metalservices.mvc.entity.ServiceOrder;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +26,69 @@ public class CreateServiceOrderRequestDTOTest {
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
+    }
+
+    @Test
+    public void when_getServiceOrderNumber_withField_thenDontReturnExeption() {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", actualDate);
+
+        assertEquals("123", createServiceOrderRequestDTO.getServiceOrderNumber());
+    }
+
+    @Test
+    public void when_getCreatedAt_withField_thenDontReturnExeption() {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", actualDate);
+
+        assertEquals(actualDate, createServiceOrderRequestDTO.getCreatedAt());
+    }
+
+    @Test
+    public void when_setServiceOrderNumber_withField_thenDontReturnExeption() {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO(null, actualDate);
+        createServiceOrderRequestDTO.setServiceOrderNumber("12345");
+
+        Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    public void when_setServiceOrderNumber_withOutField_thenReturnExeption() {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", actualDate);
+        createServiceOrderRequestDTO.setServiceOrderNumber(null);
+
+        Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    public void when_setCreateAt_withField_thenDontReturnExeption(){
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", null);
+        createServiceOrderRequestDTO.setCreatedAt(actualDate);
+
+        Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
+
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    public void when_setCreateAt_withOutField_thenReturnExeption(){
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", actualDate);
+        createServiceOrderRequestDTO.setCreatedAt(null);
+
+        Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    public void when_Construct_withOutFields(){
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO();
+
+        Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
+
+        assertFalse(violations.isEmpty());
     }
 
     @Test
@@ -71,7 +133,7 @@ public class CreateServiceOrderRequestDTOTest {
         CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", null);
 
         Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
-        
+
         assertTrue(violations.stream().filter(violation -> {
             if(violation.getMessageTemplate().equals("createdAt cannot be null.")){
                 return true;
@@ -80,28 +142,27 @@ public class CreateServiceOrderRequestDTOTest {
         }).count() == 1);
     }
 
-
     @Test
     public void when_toEntityWithAllFields_then_ReturnAnEntity(){
         CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", actualDate);
 
         Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
 
-
-
         ServiceOrder serviceOrder = createServiceOrderRequestDTO.toEntity();
 
         assertEquals(serviceOrder.getServiceOrderNumber(), "123");
         assertEquals(serviceOrder.getCreatedAt(), actualDate);
+        assertTrue(violations.isEmpty());
     }
 
     @Test
-    public void when_toEntityWithOutAllFields_then_IsNotValidated(){
+    public void when_toEntityWithNullFields_then_IsNotValidated(){
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO(null, null);
 
-        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("", null);
+        ServiceOrder serviceOrder = createServiceOrderRequestDTO.toEntity();
 
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            createServiceOrderRequestDTO.toEntity();
-        });
+        Set<ConstraintViolation<ServiceOrder>> violations = validator.validate(serviceOrder);
+
+        assertFalse(violations.isEmpty());
     }
 }
