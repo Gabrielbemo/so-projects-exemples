@@ -147,4 +147,17 @@ public class ListServiceOrderResponseDTOTest {
         assertEquals(listServiceOrderResponseDTO.getId(), null);
         assertFalse(violations.isEmpty());
     }
+
+    @Test
+    public void when_toStringOnBuilder_then_ReturnString(){
+
+        var resultToString = ListServiceOrderResponseDTO.builder()
+                .id(1L)
+                .serviceOrderNumber("123")
+                .createdAt(actualDate)
+                .toString();
+
+
+        assertEquals(resultToString,"ListServiceOrderResponseDTO.ListServiceOrderResponseDTOBuilder(id=1, serviceOrderNumber=123, createdAt=" + actualDate + ")");
+    }
 }

@@ -12,8 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-@AllArgsConstructor
-@NoArgsConstructor
 public class ListServiceOrderResponseDTO {
 
     @NotNull(message = "id cannot be null.")

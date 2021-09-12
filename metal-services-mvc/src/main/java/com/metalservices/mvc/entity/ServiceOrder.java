@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class ServiceOrder {
 
     @Id
+    @NotNull(message = "id cannot be null.")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 

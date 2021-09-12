@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MockitoExtension.class)
 public class CreateServiceOrderRequestDTOTest {
 
-    LocalDateTime actualDate = LocalDateTime.now();
-
+    private LocalDateTime actualDate;
     private Validator validator;
 
     @BeforeEach
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
+        actualDate = LocalDateTime.now();
     }
 
     @Test
