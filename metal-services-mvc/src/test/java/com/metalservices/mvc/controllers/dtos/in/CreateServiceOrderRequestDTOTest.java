@@ -101,7 +101,7 @@ public class CreateServiceOrderRequestDTOTest {
     }
 
     @Test
-    public void when_Construct_withEmptyServiceOrderNumberField(){
+    public void when_construct_withEmptyServiceOrderNumberField(){
         CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("", actualDate);
 
         Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
@@ -115,7 +115,7 @@ public class CreateServiceOrderRequestDTOTest {
     }
 
     @Test
-    public void when_Construct_withNullServiceOrderNumberField(){
+    public void when_construct_withNullServiceOrderNumberField(){
         CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO(null, actualDate);
 
         Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);
@@ -129,7 +129,7 @@ public class CreateServiceOrderRequestDTOTest {
     }
 
     @Test
-    public void when_Construct_withNullCreatedAtField(){
+    public void when_construct_withNullCreatedAtField(){
         CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("123", null);
 
         Set<ConstraintViolation<CreateServiceOrderRequestDTO>> violations = validator.validate(createServiceOrderRequestDTO);

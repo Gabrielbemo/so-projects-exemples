@@ -10,8 +10,7 @@ import javax.validation.ValidatorFactory;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ServiceOrderTest {
     private LocalDateTime actualDate;
@@ -83,5 +82,25 @@ public class ServiceOrderTest {
         Set<ConstraintViolation<ServiceOrder>> violations = validator.validate(serviceOrder);
 
         assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    public void when_construct_withOutFields(){
+        ServiceOrder serviceOrder = new ServiceOrder();
+
+        Set<ConstraintViolation<ServiceOrder>> violations = validator.validate(serviceOrder);
+
+        assertFalse(violations.isEmpty());
+    }
+
+    @Test
+    public void when_toStringOnBuilder_then_ReturnString(){
+        var resultToString = ServiceOrder.builder()
+                .id(1L)
+                .serviceOrderNumber("123")
+                .createdAt(actualDate)
+                .toString();
+
+        assertEquals(resultToString, "ServiceOrder.ServiceOrderBuilder(id=1, serviceOrderNumber=123, createdAt=" + actualDate + ")");
     }
 }
