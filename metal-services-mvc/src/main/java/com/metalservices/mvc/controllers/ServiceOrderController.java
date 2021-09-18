@@ -36,7 +36,7 @@ public class ServiceOrderController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<CreateServiceOrderResponseDTO> create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO){
+    public ResponseEntity<CreateServiceOrderResponseDTO> create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO) throws Exception{
         ServiceOrder serviceOrder = serviceOrderServices.create(createServiceOrderRequestDTO.toEntity());
 
         return new ResponseEntity<CreateServiceOrderResponseDTO>(
