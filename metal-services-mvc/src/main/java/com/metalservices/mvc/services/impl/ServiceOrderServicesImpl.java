@@ -28,4 +28,20 @@ public class ServiceOrderServicesImpl implements ServiceOrderServices {
         serviceOrderRepository.save(serviceOrder);
         return serviceOrderRepository.findByServiceOrderNumber(serviceOrder.getServiceOrderNumber());
     }
+
+    @Override
+    public void delete(long id) {
+        serviceOrderRepository.deleteById(id);
+    }
+
+    @Override
+    public ServiceOrder getById(long id) {
+        return serviceOrderRepository.getById(id);
+    }
+
+    @Override
+    public ServiceOrder update(ServiceOrder serviceOrder) {
+        serviceOrderRepository.save(serviceOrder);
+        return serviceOrderRepository.findByServiceOrderNumber(serviceOrder.getServiceOrderNumber());
+    }
 }

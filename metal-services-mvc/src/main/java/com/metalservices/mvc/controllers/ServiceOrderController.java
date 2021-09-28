@@ -1,6 +1,7 @@
 package com.metalservices.mvc.controllers;
 
 import com.metalservices.mvc.controllers.dtos.in.CreateServiceOrderRequestDTO;
+import com.metalservices.mvc.controllers.dtos.in.UpdateServiceOrderRequestDTO;
 import com.metalservices.mvc.controllers.dtos.out.CreateServiceOrderResponseDTO;
 import com.metalservices.mvc.controllers.dtos.out.ListServiceOrderResponseDTO;
 import com.metalservices.mvc.entity.ServiceOrder;
@@ -44,15 +45,24 @@ public class ServiceOrderController {
                 HttpStatus.CREATED);
     }
 
-    public void getById(){
-
+    @GetMapping("/{id}")
+    public ResponseEntity<ListServiceOrderResponseDTO> getById(@PathVariable final long id){
+        return new ResponseEntity<ListServiceOrderResponseDTO>(
+                ListServiceOrderResponseDTO.fromEntity(serviceOrderServices.getById(id)),
+                HttpStatus.OK);
     }
 
-    public void delete(){
+    @DeleteMapping("/{id}")
+    public ResponseEntity delete(@PathVariable final long id){
+        serviceOrderServices.delete(id);
 
+        return ResponseEntity.noContent().build();
     }
 
-    public void update(){
+    @PutMapping("/")
+    public ResponseEntity update(@RequestBody final UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO){
+        ServiceOrder serviceOrder = serviceOrderServices.update(updateServiceOrderRequestDTO.toEntity());
 
+        return ResponseEntity.noContent().build();
     }
 }

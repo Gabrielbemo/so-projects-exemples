@@ -7,4 +7,7 @@ import java.util.List;
 public interface ServiceOrderServices {
     List<ServiceOrder> list();
     ServiceOrder create(ServiceOrder serviceOrder);
+    void delete(long id);
+    ServiceOrder getById(long id);
+    ServiceOrder update(ServiceOrder serviceOrder);
 }
