@@ -23,7 +23,7 @@ services:
           - "3306:3306"
         restart: always
         environment:
-            MYSQL_DATABASE: polls
+            MYSQL_DATABASE: metal-service-db
             MYSQL_USER: admin
             MYSQL_PASSWORD: admin
             MYSQL_ROOT_PASSWORD: root
@@ -32,6 +32,16 @@ services:
         networks:
           - backend
 
+    app-db:
+        image: phpmyadmin/phpmyadmin:latest
+        links:
+            - db
+        ports:
+            - 80:80
+        environment:
+            - PMA_ARBITRARY=1
+        networks:
+            - backend
 volumes:
     db-data:
 

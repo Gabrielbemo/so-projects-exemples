@@ -40,8 +40,7 @@ public class ServiceOrderServicesImpl implements ServiceOrderServices {
     }
 
     @Override
-    public ServiceOrder update(ServiceOrder serviceOrder) {
+    public void update(ServiceOrder serviceOrder) {
         serviceOrderRepository.save(serviceOrder);
-        return serviceOrderRepository.findByServiceOrderNumber(serviceOrder.getServiceOrderNumber());
     }
 }

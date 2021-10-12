@@ -59,9 +59,12 @@ public class ServiceOrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/")
-    public ResponseEntity update(@RequestBody final UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO){
-        ServiceOrder serviceOrder = serviceOrderServices.update(updateServiceOrderRequestDTO.toEntity());
+    @PutMapping("/{id}")
+    public ResponseEntity update(@PathVariable final long id, @RequestBody final UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO){
+        ServiceOrder serviceOrder = serviceOrderServices.getById(id);
+        serviceOrder.setServiceOrderNumber(updateServiceOrderRequestDTO.getServiceOrderNumber());
+        serviceOrder.setCreatedAt(updateServiceOrderRequestDTO.getCreatedAt());
+        serviceOrderServices.update(serviceOrder);
 
         return ResponseEntity.noContent().build();
     }

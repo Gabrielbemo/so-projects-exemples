@@ -9,5 +9,5 @@ public interface ServiceOrderServices {
     ServiceOrder create(ServiceOrder serviceOrder);
     void delete(long id);
     ServiceOrder getById(long id);
-    ServiceOrder update(ServiceOrder serviceOrder);
+    void update(ServiceOrder serviceOrder);
 }
