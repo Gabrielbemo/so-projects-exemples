@@ -1,24 +1,40 @@
 package com.metalservices.mvc.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.metalservices.mvc.controllers.dtos.in.CreateServiceOrderRequestDTO;
+import com.metalservices.mvc.controllers.dtos.out.CreateServiceOrderResponseDTO;
+import com.metalservices.mvc.controllers.dtos.out.SOErrorDTO;
+import com.metalservices.mvc.entity.OSErrorCodes;
 import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.services.ServiceOrderServices;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +47,9 @@ public class ServiceOrderControllerTest {
 
     private MockMvc mockMvc;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Mock
     private ServiceOrderServices serviceOrderServices;
 
@@ -38,7 +57,11 @@ public class ServiceOrderControllerTest {
     public void setup() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(controller)
+                .setControllerAdvice(new ExceptionHandle())
                 .build();
+
+        objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule());
     }
 
     @Test
@@ -92,5 +115,92 @@ public class ServiceOrderControllerTest {
                 .andExpect(jsonPath("$.length()", equalTo(0)))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
+
+    @Test
+    public void when_deleteWithSuccess_expect_statusOk() throws Exception {
+        doNothing().when(serviceOrderServices).delete(1L);
+
+        MvcResult result = mockMvc.perform(delete("/service-orders/1"))
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void when_deleteWithIncorrectId_expect_status400() throws Exception {
+        doThrow(new EmptyResultDataAccessException(String.format("No class com.metalservices.mvc.entity.ServiceOrder entity with id %s exists!", 0), 1))
+                .when(serviceOrderServices)
+                .delete(0L);
+
+        MvcResult result = mockMvc.perform(delete("/service-orders/0"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn();
+    };
+
+    @Test
+    public void when_createWithSuccess_expect_statusCreated() throws Exception {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("001", LocalDateTime.parse("2088-10-10T00:00"));
+
+        ServiceOrder serviceOrder = createServiceOrderRequestDTO.toEntity();
+
+        when(serviceOrderServices.create(isA(ServiceOrder.class)))
+                .thenReturn(new ServiceOrder(1L, "001", LocalDateTime.parse("2088-10-10T00:00")));
+
+        MvcResult result = mockMvc.perform(post("/service-orders/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(serviceOrder)))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        ServiceOrder serviceOrderResult = objectMapper.readValue(result.getResponse().getContentAsString(), ServiceOrder.class);
+
+        Assertions.assertEquals(serviceOrderResult.getId(), 1);
+        Assertions.assertEquals(serviceOrderResult.getServiceOrderNumber(), createServiceOrderRequestDTO.getServiceOrderNumber());
+        Assertions.assertEquals(serviceOrderResult.getCreatedAt(), createServiceOrderRequestDTO.getCreatedAt());
+    }
+
+    @Test
+    public void when_createWithInvalidServiceOrderNumber_expect_statusBadRequest() throws Exception {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("", LocalDateTime.parse("2088-10-10T00:00"));
+
+        ServiceOrder serviceOrder = createServiceOrderRequestDTO.toEntity();
+
+        MvcResult result = mockMvc.perform(post("/service-orders/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(serviceOrder)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        SOErrorDTO errorResult = objectMapper.readValue(result.getResponse().getContentAsString(), SOErrorDTO.class);
+        
+        Assertions.assertEquals(errorResult.getCode(), HttpStatus.BAD_REQUEST.value());
+        Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ERROR_INVALID_ARGUMENTS);
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getField(), "serviceOrderNumber");
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getMessage(), "serviceOrderNumber cannot be blank.");
+    }
+
+    @Test
+    public void when_createWithInvalidCreatedAt_expect_statusBadRequest() throws Exception {
+        CreateServiceOrderRequestDTO createServiceOrderRequestDTO = new CreateServiceOrderRequestDTO("001", null);
+
+        ServiceOrder serviceOrder = createServiceOrderRequestDTO.toEntity();
+
+        MvcResult result = mockMvc.perform(post("/service-orders/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(serviceOrder)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        SOErrorDTO errorResult = objectMapper.readValue(result.getResponse().getContentAsString(), SOErrorDTO.class);
+
+        Assertions.assertEquals(errorResult.getCode(), HttpStatus.BAD_REQUEST.value());
+        Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ERROR_INVALID_ARGUMENTS);
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getField(), "createdAt");
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getMessage(), "createdAt cannot be null.");
     }
 }

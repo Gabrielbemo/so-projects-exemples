@@ -7,11 +7,15 @@ import com.metalservices.mvc.controllers.dtos.out.ListServiceOrderResponseDTO;
 import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.services.ServiceOrderServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.Validation;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +40,9 @@ public class ServiceOrderController {
 
     }
 
+    @Validated
     @PostMapping("/")
-    public ResponseEntity<CreateServiceOrderResponseDTO> create(@RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO) throws Exception{
+    public ResponseEntity<CreateServiceOrderResponseDTO> create(@Valid @RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO) throws Exception{
         ServiceOrder serviceOrder = serviceOrderServices.create(createServiceOrderRequestDTO.toEntity());
 
         return new ResponseEntity<CreateServiceOrderResponseDTO>(

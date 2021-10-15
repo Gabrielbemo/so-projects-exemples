@@ -1,9 +1,7 @@
 package com.metalservices.mvc.controllers.dtos.out;
 
 import com.metalservices.mvc.entity.ServiceOrder;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -12,6 +10,8 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateServiceOrderResponseDTO {
 
     @NotNull(message = "id cannot be null.")

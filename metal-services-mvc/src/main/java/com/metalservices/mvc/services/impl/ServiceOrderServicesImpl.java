@@ -4,6 +4,7 @@ import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.repositories.ServiceOrderRepository;
 import com.metalservices.mvc.services.ServiceOrderServices;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +31,8 @@ public class ServiceOrderServicesImpl implements ServiceOrderServices {
     }
 
     @Override
-    public void delete(long id) {
+    public void delete(long id) throws EmptyResultDataAccessException {
+
         serviceOrderRepository.deleteById(id);
     }
 
