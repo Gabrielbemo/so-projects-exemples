@@ -1,5 +1,6 @@
 package com.metalservices.mvc.services.impl;
 
+import com.metalservices.mvc.controllers.exceptions.EntityDoesNotExistException;
 import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.repositories.ServiceOrderRepository;
 import com.metalservices.mvc.services.ServiceOrderServices;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
 @Service

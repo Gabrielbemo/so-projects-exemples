@@ -3,6 +3,7 @@ package com.metalservices.mvc.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.metalservices.mvc.controllers.dtos.in.CreateServiceOrderRequestDTO;
+import com.metalservices.mvc.controllers.dtos.in.UpdateServiceOrderRequestDTO;
 import com.metalservices.mvc.controllers.dtos.out.CreateServiceOrderResponseDTO;
 import com.metalservices.mvc.controllers.dtos.out.SOErrorDTO;
 import com.metalservices.mvc.entity.OSErrorCodes;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validation;
 import java.time.LocalDateTime;
@@ -62,6 +64,41 @@ public class ServiceOrderControllerTest {
 
         objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
+    }
+
+    @Test
+    public void when_getByIdWithSuccess_andReturn1_expect_statusOk() throws Exception {
+        ServiceOrder serviceOrder = new ServiceOrder(1L, "123", LocalDateTime.now());
+
+        when(serviceOrderServices.getById(1)).thenReturn(serviceOrder);
+
+        MvcResult result = mockMvc.perform(get("/service-orders/1"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+
+        ServiceOrder serviceOrderResult = objectMapper.readValue(result.getResponse().getContentAsString(), ServiceOrder.class);
+
+        Assertions.assertEquals(serviceOrderResult.getId(), serviceOrder.getId());
+        Assertions.assertEquals(serviceOrderResult.getServiceOrderNumber(), serviceOrder.getServiceOrderNumber());
+        Assertions.assertEquals(serviceOrderResult.getCreatedAt(), serviceOrder.getCreatedAt());
+    }
+
+    @Test
+    public void when_getByIdWithInexistenceId_expect_statusNotFound() throws Exception {
+        ServiceOrder serviceOrder = new ServiceOrder(0L, "123", LocalDateTime.now());
+
+        when(serviceOrderServices.getById(1)).thenThrow(new EntityNotFoundException());
+
+        MvcResult result = mockMvc.perform(get("/service-orders/1"))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        SOErrorDTO errorResult = objectMapper.readValue(result.getResponse().getContentAsString(), SOErrorDTO.class);
+
+        Assertions.assertEquals(errorResult.getCode(), HttpStatus.NOT_FOUND.value());
+        Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ENTITY_DOES_NOT_EXIST);
     }
 
     @Test
@@ -202,5 +239,85 @@ public class ServiceOrderControllerTest {
         Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ERROR_INVALID_ARGUMENTS);
         Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getField(), "createdAt");
         Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getMessage(), "createdAt cannot be null.");
+    }
+
+    @Test
+    public void when_updateWithSuccess_expect_statusNoContent() throws Exception {
+        UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO = new UpdateServiceOrderRequestDTO("001", LocalDateTime.parse("2088-10-10T00:00"));
+
+        ServiceOrder serviceOrder = updateServiceOrderRequestDTO.toEntity();
+
+        when(serviceOrderServices.getById(1)).thenReturn(serviceOrder);
+        doNothing().when(serviceOrderServices).update(isA(ServiceOrder.class));
+
+        MvcResult result = mockMvc.perform(put("/service-orders/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateServiceOrderRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isNoContent())
+                .andReturn();
+    }
+
+    @Test
+    public void when_updateWithInvalidServiceOrderNumber_expect_statusBadRequest() throws Exception {
+        UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO = new UpdateServiceOrderRequestDTO("", LocalDateTime.parse("2088-10-10T00:00"));
+
+        ServiceOrder serviceOrder = updateServiceOrderRequestDTO.toEntity();
+
+        MvcResult result = mockMvc.perform(put("/service-orders/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateServiceOrderRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        SOErrorDTO errorResult = objectMapper.readValue(result.getResponse().getContentAsString(), SOErrorDTO.class);
+
+        Assertions.assertEquals(errorResult.getCode(), HttpStatus.BAD_REQUEST.value());
+        Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ERROR_INVALID_ARGUMENTS);
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getField(), "serviceOrderNumber");
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getMessage(), "serviceOrderNumber cannot be blank.");
+    }
+
+    @Test
+    public void when_updateWithInvalidCreatedAt_expect_statusBadRequest() throws Exception {
+        UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO = new UpdateServiceOrderRequestDTO("001", null);
+
+        ServiceOrder serviceOrder = updateServiceOrderRequestDTO.toEntity();
+
+        MvcResult result = mockMvc.perform(put("/service-orders/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateServiceOrderRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        SOErrorDTO errorResult = objectMapper.readValue(result.getResponse().getContentAsString(), SOErrorDTO.class);
+
+        Assertions.assertEquals(errorResult.getCode(), HttpStatus.BAD_REQUEST.value());
+        Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ERROR_INVALID_ARGUMENTS);
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getField(), "createdAt");
+        Assertions.assertEquals(errorResult.getFieldsErrors().get(0).getMessage(), "createdAt cannot be null.");
+    }
+
+    @Test
+    public void when_updateWithInvalidId_expect_statusBadRequest() throws Exception {
+        UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO = new UpdateServiceOrderRequestDTO("001", LocalDateTime.parse("2088-10-10T00:00"));
+
+        ServiceOrder serviceOrder = updateServiceOrderRequestDTO.toEntity();
+
+        when(serviceOrderServices.getById(0)).thenThrow(new EntityNotFoundException());
+
+        MvcResult result = mockMvc.perform(put("/service-orders/0")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateServiceOrderRequestDTO)))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andReturn();
+
+        SOErrorDTO errorResult = objectMapper.readValue(result.getResponse().getContentAsString(), SOErrorDTO.class);
+
+        Assertions.assertEquals(errorResult.getCode(), HttpStatus.NOT_FOUND.value());
+        Assertions.assertEquals(errorResult.getError(), OSErrorCodes.OS_ENTITY_DOES_NOT_EXIST);
     }
 }

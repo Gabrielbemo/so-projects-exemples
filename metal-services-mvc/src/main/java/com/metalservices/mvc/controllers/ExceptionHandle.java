@@ -2,6 +2,7 @@ package com.metalservices.mvc.controllers;
 
 import com.metalservices.mvc.controllers.dtos.out.FieldErrorDTO;
 import com.metalservices.mvc.controllers.dtos.out.SOErrorDTO;
+import com.metalservices.mvc.controllers.exceptions.EntityDoesNotExistException;
 import com.metalservices.mvc.entity.OSErrorCodes;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -21,20 +22,6 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestControllerAdvice
 public class ExceptionHandle {
-
-    @ExceptionHandler({ConstraintViolationException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public SOErrorDTO handlerMethodArgumentNotValidException(final ConstraintViolationException ex){
-        List<FieldErrorDTO> fieldErrorDTO = ex
-                .getConstraintViolations()
-                .stream()
-                .map(FieldErrorDTO::from)
-                .collect(Collectors.toList());
-
-        SOErrorDTO soErrorDTO = SOErrorDTO.from(BAD_REQUEST, OSErrorCodes.OS_ERROR_INVALID_ARGUMENTS,"Invalid Arguments", fieldErrorDTO);
-
-        return soErrorDTO;
-    }
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -60,6 +47,15 @@ public class ExceptionHandle {
     public SOErrorDTO handlerEmptyResultDataAccessException(final EmptyResultDataAccessException ex){
 
         SOErrorDTO soErrorDTO = SOErrorDTO.from(NOT_FOUND, OSErrorCodes.OS_EMPTY_RESULT_DATA_ACCESS, ex.getLocalizedMessage(), null);
+
+        return soErrorDTO;
+    }
+
+    @ExceptionHandler({EntityDoesNotExistException.class})
+    @ResponseStatus(NOT_FOUND)
+    public SOErrorDTO handlerEntityDoesNotExistException(final EntityDoesNotExistException ex){
+
+        SOErrorDTO soErrorDTO = SOErrorDTO.from(NOT_FOUND, OSErrorCodes.OS_ENTITY_DOES_NOT_EXIST, ex.getLocalizedMessage(), null);
 
         return soErrorDTO;
     }

@@ -1,5 +1,6 @@
 package com.metalservices.mvc.services;
 
+import com.metalservices.mvc.controllers.exceptions.EntityDoesNotExistException;
 import com.metalservices.mvc.entity.ServiceOrder;
 import org.springframework.dao.EmptyResultDataAccessException;
 

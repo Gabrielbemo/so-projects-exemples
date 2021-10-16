@@ -4,6 +4,7 @@ import com.metalservices.mvc.controllers.dtos.in.CreateServiceOrderRequestDTO;
 import com.metalservices.mvc.controllers.dtos.in.UpdateServiceOrderRequestDTO;
 import com.metalservices.mvc.controllers.dtos.out.CreateServiceOrderResponseDTO;
 import com.metalservices.mvc.controllers.dtos.out.ListServiceOrderResponseDTO;
+import com.metalservices.mvc.controllers.exceptions.EntityDoesNotExistException;
 import com.metalservices.mvc.entity.ServiceOrder;
 import com.metalservices.mvc.services.ServiceOrderServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import java.util.List;
@@ -40,7 +42,6 @@ public class ServiceOrderController {
 
     }
 
-    @Validated
     @PostMapping("/")
     public ResponseEntity<CreateServiceOrderResponseDTO> create(@Valid @RequestBody final CreateServiceOrderRequestDTO createServiceOrderRequestDTO) throws Exception{
         ServiceOrder serviceOrder = serviceOrderServices.create(createServiceOrderRequestDTO.toEntity());
@@ -51,9 +52,15 @@ public class ServiceOrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ListServiceOrderResponseDTO> getById(@PathVariable final long id){
+    public ResponseEntity<ListServiceOrderResponseDTO> getById(@PathVariable final long id) throws EntityDoesNotExistException {
+        ServiceOrder serviceOrder;
+        try{
+            serviceOrder = serviceOrderServices.getById(id);
+        }catch (EntityNotFoundException e){
+            throw new EntityDoesNotExistException("Entity with id "+id+" does not exist");
+        }
         return new ResponseEntity<ListServiceOrderResponseDTO>(
-                ListServiceOrderResponseDTO.fromEntity(serviceOrderServices.getById(id)),
+                ListServiceOrderResponseDTO.fromEntity(serviceOrder),
                 HttpStatus.OK);
     }
 
@@ -65,8 +72,13 @@ public class ServiceOrderController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity update(@PathVariable final long id, @RequestBody final UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO){
-        ServiceOrder serviceOrder = serviceOrderServices.getById(id);
+    public ResponseEntity update(@PathVariable final long id,@Valid @RequestBody final UpdateServiceOrderRequestDTO updateServiceOrderRequestDTO) throws EntityDoesNotExistException {
+        ServiceOrder serviceOrder;
+        try{
+            serviceOrder = serviceOrderServices.getById(id);
+        }catch (EntityNotFoundException e){
+            throw new EntityDoesNotExistException("Entity with id "+id+" does not exist");
+        }
         serviceOrder.setServiceOrderNumber(updateServiceOrderRequestDTO.getServiceOrderNumber());
         serviceOrder.setCreatedAt(updateServiceOrderRequestDTO.getCreatedAt());
         serviceOrderServices.update(serviceOrder);
